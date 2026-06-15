@@ -1,7 +1,7 @@
 {
   "users": [
     {
-      "userId": 123,
+      "id": 123,
       "name": "Thaís",
       "email": "thais@email.com",
       "password": "thais123",
@@ -48,38 +48,23 @@
       }
     },
     {
-      "userId": 124,
-      "name": "Carlos",
-      "email": "carlos@email.com",
-      "password": "carlos123",
+      "id": 968,
+      "name": "João",
+      "email": "joao@email.com",
+      "password": "joao2026",
       "accounts": {
-        "balance": 2100,
-        "transactions": [
-          {
-            "transactionId": 2001,
-            "type": "DEPOSIT",
-            "date": "2026-06-14T10:00:00Z",
-            "value": 2000
-          },
-          {
-            "transactionId": 2002,
-            "type": "TRANSFER",
-            "date": "2026-06-14T12:00:00Z",
-            "value": 300
-          },
-          {
-            "transactionId": 2003,
-            "type": "DEPOSIT",
-            "date": "2026-06-15T09:30:00Z",
-            "value": 500
-          },
-          {
-            "transactionId": 2004,
-            "type": "TRANSFER",
-            "date": "2026-06-15T14:00:00Z",
-            "value": 100
-          }
-        ]
+        "balance": 0,
+        "transactions": []
+      }
+    },
+    {
+      "id": 100,
+      "name": "Joaquina",
+      "email": "joaquina@email.com",
+      "password": "joaquina2026",
+      "accounts": {
+        "balance": 0,
+        "transactions": []
       }
     }
   ]

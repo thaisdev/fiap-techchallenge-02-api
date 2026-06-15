@@ -39,6 +39,31 @@ server.post("/login", (req, res) => {
   return res.status(200).json({ token });
 });
 
+server.use((req, res, next) => {
+  const isPublicRoute =
+    req.method === "POST" && (req.path === "/login" || req.path === "/users");
+
+  if (isPublicRoute) {
+    return next();
+  }
+
+  const authHeader = req.headers.authorization || "";
+  const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : null;
+
+  if (!token) {
+    return res.status(401).json({ message: "Token não fornecido ou inválido" });
+  }
+
+  jwt.verify(token, JWT_SECRET, (err, decoded) => {
+    if (err) {
+      return res.status(401).json({ message: "Token inválido ou expirado" });
+    }
+
+    req.user = decoded;
+    next();
+  });
+});
+
 // Mount json-server router after custom routes
 server.use(router);
 

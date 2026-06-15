@@ -13,7 +13,7 @@ npm install
 Crie um arquivo `.env` na raiz do projeto com as variáveis abaixo. Você pode usar `.env.example` como modelo.
 
 ```env
-JWT_SECRET=change_this_secret
+JWT_SECRET=your_jwt_secret_here
 JWT_EXPIRES_IN=1h
 PORT=3333
 ```
