@@ -9,37 +9,37 @@
         "balance": 7700,
         "transactions": [
           {
-            "transactionId": 789,
+            "id": 789,
             "type": "DEPOSIT",
             "date": "2026-06-14T19:48:00Z",
             "value": 6000
           },
           {
-            "transactionId": 987,
+            "id": 987,
             "type": "TRANSFER",
             "date": "2026-06-14T20:48:00Z",
             "value": 1000
           },
           {
-            "transactionId": 1001,
+            "id": 1001,
             "type": "DEPOSIT",
             "date": "2026-06-15T09:00:00Z",
             "value": 2500
           },
           {
-            "transactionId": 1002,
+            "id": 1002,
             "type": "TRANSFER",
             "date": "2026-06-15T11:20:00Z",
             "value": 400
           },
           {
-            "transactionId": 1003,
+            "id": 1003,
             "type": "DEPOSIT",
             "date": "2026-06-15T13:45:00Z",
             "value": 1200
           },
           {
-            "transactionId": 1004,
+            "id": 1004,
             "type": "TRANSFER",
             "date": "2026-06-15T16:10:00Z",
             "value": 600
