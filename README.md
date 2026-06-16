@@ -32,6 +32,26 @@ npm start
 
 O servidor ficará disponível em `http://localhost:3333`.
 
+## Docker
+
+### Build da imagem
+
+```bash
+docker build -t fiap-challenge-02-api .
+```
+
+### Executar o container
+
+```bash
+docker run -p 3333:3333 \
+  -e JWT_SECRET=sua_chave_secreta \
+  -e JWT_EXPIRES_IN=1h \
+  fiap-challenge-02-api
+```
+
+O servidor ficará disponível em `http://localhost:3333`.
+
+
 ## Autenticação
 
 As rotas são protegidas por JWT, exceto:
