@@ -56,10 +56,13 @@ server.post("/login", (req, res) => {
   if (user.password !== password)
     return res.status(401).json({ message: "Senha incorreta" });
 
-  const payload = { userId: user.userId, email: user.email };
+  const payload = { userId: user.id, email: user.email };
   const token = jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
 
-  return res.status(200).json({ token });
+  return res.status(200).json({
+    token,
+    user: { id: user.id, name: user.name, email: user.email },
+  });
 });
 
 server.use((req, res, next) => {
