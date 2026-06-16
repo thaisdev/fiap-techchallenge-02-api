@@ -89,7 +89,7 @@ Respostas:
 
 ### GET `/users/:id/account`
 
-Retorna o objeto `accounts` do usuário informado.
+Retorna o objeto `account` do usuário informado.
 
 Resposta:
 

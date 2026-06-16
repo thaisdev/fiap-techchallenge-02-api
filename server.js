@@ -27,12 +27,12 @@ function saveDb(data) {
   fs.writeFileSync(dbPath, JSON.stringify(data, null, 2), "utf-8");
 }
 
-function recalculateBalance(accounts) {
-  if (!accounts || !Array.isArray(accounts.transactions)) {
+function recalculateBalance(account) {
+  if (!account || !Array.isArray(account.transactions)) {
     return 0;
   }
 
-  return accounts.transactions.reduce((sum, tx) => {
+  return account.transactions.reduce((sum, tx) => {
     const amount = Number(tx.value) || 0;
     if (String(tx.type).toUpperCase() === "DEPOSIT") {
       return sum + amount;
@@ -97,7 +97,7 @@ server.get("/users/:id/account", (req, res) => {
     return res.status(404).json({ message: "Usuário não encontrado" });
   }
 
-  return res.status(200).json(user.accounts || {});
+  return res.status(200).json(user.account || {});
 });
 
 server.post("/users/:id/account/transactions", (req, res) => {
@@ -124,16 +124,16 @@ server.post("/users/:id/account/transactions", (req, res) => {
   }
 
   const user = users[userIndex];
-  if (!user.accounts) {
-    user.accounts = { balance: 0, transactions: [] };
+  if (!user.account) {
+    user.account = { balance: 0, transactions: [] };
   }
 
-  if (!Array.isArray(user.accounts.transactions)) {
-    user.accounts.transactions = [];
+  if (!Array.isArray(user.account.transactions)) {
+    user.account.transactions = [];
   }
 
-  user.accounts.transactions.push(transaction);
-  user.accounts.balance = recalculateBalance(user.accounts);
+  user.account.transactions.push(transaction);
+  user.account.balance = recalculateBalance(user.account);
 
   saveDb(db);
 
@@ -165,11 +165,11 @@ server.put("/users/:id/account/transactions/:transactionId", (req, res) => {
   }
 
   const user = users[userIndex];
-  if (!user.accounts || !Array.isArray(user.accounts.transactions)) {
+  if (!user.account || !Array.isArray(user.account.transactions)) {
     return res.status(404).json({ message: "Transação não encontrada" });
   }
 
-  const transactionIndex = user.accounts.transactions.findIndex(
+  const transactionIndex = user.account.transactions.findIndex(
     (tx) => Number(tx.id) === transactionId,
   );
 
@@ -177,8 +177,8 @@ server.put("/users/:id/account/transactions/:transactionId", (req, res) => {
     return res.status(404).json({ message: "Transação não encontrada" });
   }
 
-  user.accounts.transactions[transactionIndex] = updatedTransaction;
-  user.accounts.balance = recalculateBalance(user.accounts);
+  user.account.transactions[transactionIndex] = updatedTransaction;
+  user.account.balance = recalculateBalance(user.account);
   saveDb(db);
 
   return res.status(200).json(updatedTransaction);
@@ -197,11 +197,11 @@ server.delete("/users/:id/account/transactions/:transactionId", (req, res) => {
   }
 
   const user = users[userIndex];
-  if (!user.accounts || !Array.isArray(user.accounts.transactions)) {
+  if (!user.account || !Array.isArray(user.account.transactions)) {
     return res.status(404).json({ message: "Transação não encontrada" });
   }
 
-  const transactionIndex = user.accounts.transactions.findIndex(
+  const transactionIndex = user.account.transactions.findIndex(
     (tx) => Number(tx.id) === transactionId,
   );
 
@@ -209,8 +209,11 @@ server.delete("/users/:id/account/transactions/:transactionId", (req, res) => {
     return res.status(404).json({ message: "Transação não encontrada" });
   }
 
-  const [deletedTransaction] = user.accounts.transactions.splice(transactionIndex, 1);
-  user.accounts.balance = recalculateBalance(user.accounts);
+  const [deletedTransaction] = user.account.transactions.splice(
+    transactionIndex,
+    1,
+  );
+  user.account.balance = recalculateBalance(user.account);
   saveDb(db);
 
   return res.status(200).json(deletedTransaction);

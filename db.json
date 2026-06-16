@@ -5,7 +5,7 @@
       "name": "Thaís",
       "email": "thais@email.com",
       "password": "thais123",
-      "accounts": {
+      "account": {
         "balance": 7700,
         "transactions": [
           {
@@ -52,7 +52,7 @@
       "name": "João",
       "email": "joao@email.com",
       "password": "joao2026",
-      "accounts": {
+      "account": {
         "balance": 0,
         "transactions": []
       }
@@ -62,10 +62,16 @@
       "name": "Joaquina",
       "email": "joaquina@email.com",
       "password": "joaquina2026",
-      "accounts": {
+      "account": {
         "balance": 0,
         "transactions": []
       }
+    },
+    {
+      "name": "Usuário",
+      "email": "user@email.com",
+      "password": "user123",
+      "id": 969
     }
   ]
 }
