@@ -1,10 +1,10 @@
 {
   "users": [
     {
-      "id": 123,
-      "name": "Thaís",
-      "email": "thais@email.com",
-      "password": "thais123",
+      "name": "Usuário default",
+      "email": "default@email.com",
+      "password": "100406",
+      "id": 100,
       "account": {
         "balance": 7700,
         "transactions": [
@@ -48,30 +48,21 @@
       }
     },
     {
-      "id": 968,
-      "name": "João",
-      "email": "joao@email.com",
-      "password": "joao2026",
+      "id": 101,
+      "name": "Usuário novo",
+      "email": "new@email.com",
+      "password": "new123",
       "account": {
-        "balance": 0,
-        "transactions": []
+        "balance": -50,
+        "transactions": [
+          {
+            "id": 1781643763921,
+            "type": "TRANSFER",
+            "value": 50,
+            "date": "2026-06-09T12:00:00.000Z"
+          }
+        ]
       }
-    },
-    {
-      "id": 100,
-      "name": "Joaquina",
-      "email": "joaquina@email.com",
-      "password": "joaquina2026",
-      "account": {
-        "balance": 0,
-        "transactions": []
-      }
-    },
-    {
-      "name": "Usuário",
-      "email": "user@email.com",
-      "password": "user123",
-      "id": 969
     }
   ]
 }

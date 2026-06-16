@@ -222,6 +222,27 @@ server.delete("/users/:id/account/transactions/:transactionId", (req, res) => {
   return res.status(200).json(deletedTransaction);
 });
 
+server.post("/users", (req, res) => {
+  const db = loadDb();
+  const users = Array.isArray(db.users) ? db.users : [];
+
+  const maxId = users.reduce((max, u) => Math.max(max, Number(u.id) || 0), 0);
+  const newUser = {
+    id: maxId + 1,
+    ...req.body,
+    account: {
+      balance: 0,
+      transactions: [],
+    },
+  };
+
+  users.push(newUser);
+  db.users = users;
+  saveDb(db);
+
+  return res.status(201).json(newUser);
+});
+
 // Mount json-server router after custom routes
 server.use(router);
 
