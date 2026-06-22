@@ -109,13 +109,102 @@ Respostas:
 
 ### GET `/users/:id/account`
 
-Retorna o objeto `account` do usuário informado.
+Retorna apenas o resumo da conta do usuário, sem transações.
 
 Resposta:
 
-- `200`: `{ "balance": number, "transactions": [ ... ] }`
+```json
+{
+  "balance": 7700
+}
+```
+
+Respostas:
+
+- `200`: `{ "balance": number }`
 - `404`: `{ "message": "Usuário não encontrado" }`
 - `401`: `{ "message": "Token inválido ou expirado" }` ou `{ "message": "Token não fornecido ou inválido" }`
+
+### GET `/users/:id/account/transactions`
+
+Retorna as transações do usuário com paginação.
+
+Query params:
+
+- `page`: número da página. Valor padrão: `1`.
+- `limit`: quantidade de itens por página. Valor padrão: `10`.
+
+Exemplo:
+
+```http
+GET /users/100/account/transactions?page=1&limit=2
+Authorization: Bearer <token>
+```
+
+Resposta:
+
+```json
+{
+  "data": [
+    {
+      "id": 789,
+      "type": "DEPOSIT",
+      "date": "2026-06-14T19:48:00Z",
+      "value": 6000
+    },
+    {
+      "id": 987,
+      "type": "TRANSFER",
+      "date": "2026-06-14T20:48:00Z",
+      "value": 1000
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 2,
+    "totalItems": 6,
+    "totalPages": 3,
+    "hasNextPage": true,
+    "hasPreviousPage": false
+  }
+}
+```
+
+As transações são ordenadas da mais recente para a mais antiga antes da paginação.
+
+Respostas:
+
+- `200`: lista paginada de transações
+- `400`: parâmetros de paginação inválidos
+- `404`: `{ "message": "Usuário não encontrado" }`
+- `401`: token ausente ou inválido
+
+### GET `/users/:id/account/transactions/summary`
+
+Retorna os totais agregados de depósitos, transferências e saldo para gráficos.
+
+Exemplo:
+
+```http
+GET /users/100/account/transactions/summary
+Authorization: Bearer <token>
+```
+
+Resposta:
+
+```json
+{
+  "depositsTotal": 9700,
+  "transfersTotal": 2000,
+  "balance": 7700
+}
+```
+
+Respostas:
+
+- `200`: resumo financeiro agregado
+- `404`: `{ "message": "Usuário não encontrado" }`
+- `401`: token ausente ou inválido
 
 ### POST `/users/:id/account/transactions`
 
