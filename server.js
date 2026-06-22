@@ -44,6 +44,70 @@ function recalculateBalance(account) {
   }, 0);
 }
 
+function getPaginationParams(query) {
+  const page = query.page === undefined ? 1 : Number(query.page);
+  const limit = query.limit === undefined ? 10 : Number(query.limit);
+
+  return { page, limit };
+}
+
+function paginate(items, page, limit) {
+  const totalItems = items.length;
+  const totalPages = Math.ceil(totalItems / limit);
+  const startIndex = (page - 1) * limit;
+  const endIndex = startIndex + limit;
+
+  return {
+    data: items.slice(startIndex, endIndex),
+    pagination: {
+      page,
+      limit,
+      totalItems,
+      totalPages,
+      hasNextPage: page < totalPages,
+      hasPreviousPage: page > 1,
+    },
+  };
+}
+
+function sortTransactionsByMostRecent(transactions) {
+  return [...transactions].sort((a, b) => {
+    const dateA = new Date(a.date).getTime();
+    const dateB = new Date(b.date).getTime();
+
+    return dateB - dateA;
+  });
+}
+
+function summarizeTransactions(account) {
+  const transactions = Array.isArray(account?.transactions)
+    ? account.transactions
+    : [];
+
+  const totals = transactions.reduce(
+    (summary, tx) => {
+      const amount = Number(tx.value) || 0;
+      const type = String(tx.type).toUpperCase();
+
+      if (type === "DEPOSIT") {
+        summary.depositsTotal += amount;
+      }
+
+      if (type === "TRANSFER") {
+        summary.transfersTotal += amount;
+      }
+
+      return summary;
+    },
+    { depositsTotal: 0, transfersTotal: 0 },
+  );
+
+  return {
+    ...totals,
+    balance: recalculateBalance(account),
+  };
+}
+
 server.post("/login", (req, res) => {
   const { email, password } = req.body || {};
   if (!email || !password)
@@ -100,7 +164,53 @@ server.get("/users/:id/account", (req, res) => {
     return res.status(404).json({ message: "Usuário não encontrado" });
   }
 
-  return res.status(200).json(user.account || {});
+  return res.status(200).json({
+    balance: Number(user.account?.balance) || 0,
+  });
+});
+
+server.get("/users/:id/account/transactions", (req, res) => {
+  const userId = Number(req.params.id);
+  const { page, limit } = getPaginationParams(req.query);
+
+  if (
+    !Number.isInteger(page) ||
+    !Number.isInteger(limit) ||
+    page < 1 ||
+    limit < 1
+  ) {
+    return res
+      .status(400)
+      .json({ message: "Os parâmetros page e limit devem ser maiores que zero" });
+  }
+
+  const db = loadDb();
+  const users = Array.isArray(db.users) ? db.users : [];
+  const user = users.find((u) => u.id === userId);
+
+  if (!user) {
+    return res.status(404).json({ message: "Usuário não encontrado" });
+  }
+
+  const transactions = Array.isArray(user.account?.transactions)
+    ? user.account.transactions
+    : [];
+  const sortedTransactions = sortTransactionsByMostRecent(transactions);
+
+  return res.status(200).json(paginate(sortedTransactions, page, limit));
+});
+
+server.get("/users/:id/account/transactions/summary", (req, res) => {
+  const userId = Number(req.params.id);
+  const db = loadDb();
+  const users = Array.isArray(db.users) ? db.users : [];
+  const user = users.find((u) => u.id === userId);
+
+  if (!user) {
+    return res.status(404).json({ message: "Usuário não encontrado" });
+  }
+
+  return res.status(200).json(summarizeTransactions(user.account));
 });
 
 server.post("/users/:id/account/transactions", (req, res) => {
