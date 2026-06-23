@@ -2,6 +2,25 @@
 
 API simples com `json-server` e autenticação JWT.
 
+## Índice
+
+- [Instalação](#instalação)
+- [Configuração de ambiente](#configuração-de-ambiente)
+- [Execução](#execução)
+- [Docker](#docker)
+- [Autenticação](#autenticação)
+- [Rota de login](#rota-de-login)
+  - [POST /login](#post-login)
+- [Rotas de usuário](#rotas-de-usuário)
+  - [POST /users](#post-users)
+  - [GET /users/:id/account](#get-usersidaccount)
+  - [GET /users/:id/account/transactions](#get-usersidaccounttransactions)
+  - [GET /users/:id/account/transactions/summary](#get-usersidaccounttransactionssummary)
+  - [POST /users/:id/account/transactions](#post-usersidaccounttransactions)
+  - [PUT /users/:id/account/transactions/:transactionId](#put-usersidaccounttransactionstransactionid)
+  - [DELETE /users/:id/account/transactions/:transactionId](#delete-usersidaccounttransactionstransactionid)
+- [Observações](#observações)
+
 ## Instalação
 
 ```bash
@@ -127,17 +146,60 @@ Respostas:
 
 ### GET `/users/:id/account/transactions`
 
-Retorna as transações do usuário com paginação.
+Retorna as transações do usuário ordenadas da mais recente para a mais antiga, com suporte a paginação.
 
-Query params:
+#### Query params
 
-- `page`: número da página. Valor padrão: `1`.
-- `limit`: quantidade de itens por página. Valor padrão: `10`.
+| Parâmetro   | Tipo    | Padrão | Descrição                                           |
+|-------------|---------|--------|-----------------------------------------------------|
+| `page`      | inteiro | `1`    | Número da página (mínimo: `1`)                      |
+| `limit`     | inteiro | `10`   | Quantidade de itens por página (mínimo: `1`)        |
+| `startDate` | string  | —      | Data inicial no formato `YYYY-MM-DD`. Considera `00:00:00 UTC` do dia informado |
+| `endDate`   | string  | —      | Data final no formato `YYYY-MM-DD`. Considera `23:59:59 UTC` do dia informado   |
+| `type`      | string  | —      | Tipo da transação: `DEPOSIT` ou `TRANSFER` (case-insensitive) |
 
-Exemplo:
+> `page` e `limit` devem ser inteiros positivos. Valores não numéricos, decimais ou menores que `1` resultam em `400`.  
+> `startDate` e `endDate` devem ser datas válidas no formato `YYYY-MM-DD`; caso contrário retornam `400`.  
+> Os filtros são cumulativos: é possível combinar `startDate`, `endDate` e `type` ao mesmo tempo.
+
+#### Exemplos de filtros
+
+**Filtrar por tipo:**
 
 ```http
-GET /users/100/account/transactions?page=1&limit=2
+GET /users/100/account/transactions?type=TRANSFER
+Authorization: Bearer <token>
+```
+
+**Filtrar por data inicial:**
+
+```http
+GET /users/100/account/transactions?startDate=2026-06-19
+Authorization: Bearer <token>
+```
+
+Retorna transações com `date >= 2026-06-19T00:00:00.000Z`.
+
+**Filtrar por data final:**
+
+```http
+GET /users/100/account/transactions?endDate=2026-06-19
+Authorization: Bearer <token>
+```
+
+Retorna transações com `date <= 2026-06-19T23:59:59.999Z`.
+
+**Filtrar por intervalo de datas:**
+
+```http
+GET /users/100/account/transactions?startDate=2026-06-18&endDate=2026-06-19
+Authorization: Bearer <token>
+```
+
+**Combinar todos os filtros com paginação:**
+
+```http
+GET /users/100/account/transactions?startDate=2026-06-18&endDate=2026-06-19&type=TRANSFER&page=1&limit=5
 Authorization: Bearer <token>
 ```
 
@@ -147,35 +209,45 @@ Resposta:
 {
   "data": [
     {
-      "id": 789,
-      "type": "DEPOSIT",
-      "date": "2026-06-14T19:48:00Z",
-      "value": 6000
+      "id": 1782086300008,
+      "type": "TRANSFER",
+      "value": 750,
+      "date": "2026-06-18T18:10:00.000Z"
     },
     {
-      "id": 987,
+      "id": 1782086300006,
       "type": "TRANSFER",
-      "date": "2026-06-14T20:48:00Z",
-      "value": 1000
+      "value": 2000,
+      "date": "2026-06-18T15:20:00.000Z"
     }
   ],
   "pagination": {
     "page": 1,
-    "limit": 2,
-    "totalItems": 6,
-    "totalPages": 3,
-    "hasNextPage": true,
+    "limit": 5,
+    "totalItems": 5,
+    "totalPages": 1,
+    "hasNextPage": false,
     "hasPreviousPage": false
   }
 }
 ```
 
-As transações são ordenadas da mais recente para a mais antiga antes da paginação.
+#### Campos do objeto `pagination`
+
+| Campo            | Tipo    | Descrição                                                          |
+|------------------|---------|--------------------------------------------------------------------|
+| `page`           | inteiro | Página atual                                                       |
+| `limit`          | inteiro | Quantidade de itens por página solicitada                          |
+| `totalItems`     | inteiro | Total de transações após aplicar os filtros                        |
+| `totalPages`     | inteiro | Total de páginas disponíveis (`ceil(totalItems / limit)`)          |
+| `hasNextPage`    | boolean | `true` se existe uma próxima página                                |
+| `hasPreviousPage`| boolean | `true` se existe uma página anterior                               |
 
 Respostas:
 
 - `200`: lista paginada de transações
-- `400`: parâmetros de paginação inválidos
+- `400`: `page` ou `limit` não numéricos, decimais ou menores que `1`
+- `400`: `{ "message": "startDate inválido" }` ou `{ "message": "endDate inválido" }`
 - `404`: `{ "message": "Usuário não encontrado" }`
 - `401`: token ausente ou inválido
 
