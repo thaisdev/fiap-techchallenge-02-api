@@ -184,6 +184,16 @@ server.get("/users/:id/account/transactions", (req, res) => {
       .json({ message: "Os parâmetros page e limit devem ser maiores que zero" });
   }
 
+  const { startDate, endDate, type } = req.query;
+
+  if (startDate && isNaN(new Date(startDate).getTime())) {
+    return res.status(400).json({ message: "startDate inválido" });
+  }
+
+  if (endDate && isNaN(new Date(endDate).getTime())) {
+    return res.status(400).json({ message: "endDate inválido" });
+  }
+
   const db = loadDb();
   const users = Array.isArray(db.users) ? db.users : [];
   const user = users.find((u) => u.id === userId);
@@ -192,9 +202,29 @@ server.get("/users/:id/account/transactions", (req, res) => {
     return res.status(404).json({ message: "Usuário não encontrado" });
   }
 
-  const transactions = Array.isArray(user.account?.transactions)
+  let transactions = Array.isArray(user.account?.transactions)
     ? user.account.transactions
     : [];
+
+  if (startDate) {
+    const start = new Date(startDate);
+    start.setUTCHours(0, 0, 0, 0);
+    transactions = transactions.filter((tx) => new Date(tx.date) >= start);
+  }
+
+  if (endDate) {
+    const end = new Date(endDate);
+    end.setUTCHours(23, 59, 59, 999);
+    transactions = transactions.filter((tx) => new Date(tx.date) <= end);
+  }
+
+  if (type) {
+    const normalizedType = String(type).toUpperCase();
+    transactions = transactions.filter(
+      (tx) => String(tx.type).toUpperCase() === normalizedType,
+    );
+  }
+
   const sortedTransactions = sortTransactionsByMostRecent(transactions);
 
   return res.status(200).json(paginate(sortedTransactions, page, limit));
