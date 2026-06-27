@@ -16,6 +16,7 @@ API simples com `json-server` e autenticação JWT.
   - [GET /users/:id/account](#get-usersidaccount)
   - [GET /users/:id/account/transactions](#get-usersidaccounttransactions)
   - [GET /users/:id/account/transactions/summary](#get-usersidaccounttransactionssummary)
+  - [GET /users/:id/account/transactions/:transactionId](#get-usersidaccounttransactionstransactionid)
   - [POST /users/:id/account/transactions](#post-usersidaccounttransactions)
   - [PUT /users/:id/account/transactions/:transactionId](#put-usersidaccounttransactionstransactionid)
   - [DELETE /users/:id/account/transactions/:transactionId](#delete-usersidaccounttransactionstransactionid)
@@ -276,6 +277,35 @@ Respostas:
 
 - `200`: resumo financeiro agregado
 - `404`: `{ "message": "Usuário não encontrado" }`
+- `401`: token ausente ou inválido
+
+### GET `/users/:id/account/transactions/:transactionId`
+
+Retorna uma transação específica pertencente ao usuário autenticado.
+
+Exemplo:
+
+```http
+GET /users/100/account/transactions/1782086245806
+Authorization: Bearer <token>
+```
+
+Resposta:
+
+```json
+{
+  "id": 1782086245806,
+  "type": "DEPOSIT",
+  "value": 40000,
+  "date": "2026-06-21T23:57:24.811Z"
+}
+```
+
+Respostas:
+
+- `200`: objeto da transação encontrada
+- `403`: `{ "message": "Acesso negado" }` quando o usuário da rota não corresponde ao usuário autenticado
+- `404`: `{ "message": "Usuário não encontrado" }` ou `{ "message": "Transação não encontrada" }`
 - `401`: token ausente ou inválido
 
 ### POST `/users/:id/account/transactions`

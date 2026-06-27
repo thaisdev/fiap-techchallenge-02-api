@@ -243,6 +243,39 @@ server.get("/users/:id/account/transactions/summary", (req, res) => {
   return res.status(200).json(summarizeTransactions(user.account));
 });
 
+server.get(
+  "/users/:id/account/transactions/:transactionId",
+  (req, res) => {
+    const userId = Number(req.params.id);
+    const transactionId = Number(req.params.transactionId);
+
+    if (Number(req.user.userId) !== userId) {
+      return res.status(403).json({ message: "Acesso negado" });
+    }
+
+    const db = loadDb();
+    const users = Array.isArray(db.users) ? db.users : [];
+    const user = users.find((u) => u.id === userId);
+
+    if (!user) {
+      return res.status(404).json({ message: "Usuário não encontrado" });
+    }
+
+    const transactions = Array.isArray(user.account?.transactions)
+      ? user.account.transactions
+      : [];
+    const transaction = transactions.find(
+      (tx) => Number(tx.id) === transactionId,
+    );
+
+    if (!transaction) {
+      return res.status(404).json({ message: "Transação não encontrada" });
+    }
+
+    return res.status(200).json(transaction);
+  },
+);
+
 server.post("/users/:id/account/transactions", (req, res) => {
   const userId = Number(req.params.id);
   const transaction = req.body;
